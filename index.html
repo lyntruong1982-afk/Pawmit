@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Make a cute licence card for your best friend. Add a photo and details, then flip the card to see the back.">
+<title>Pawmit</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Mono:wght@500&family=Figtree:wght@400;600;700;800&display=swap">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: slim brand bar, a hero line with a small dog mascot, then the licence preview beside a tabbed editor. Wide screens put the card in a sticky left column; phones stack. */
+:root {
+  --bg: #f3f6fb;
+  --surface: #ffffff;
+  --surface-2: #f7f9fd;
+  --line: #dde3ee;
+  --line-strong: #c5cfe0;
+  --ink: #14213d;
+  --muted: #5a6784;
+  --accent: #ff8a3d;
+  --on-accent: #14213d;
+  --sel-bg: #14213d;
+  --sel-fg: #ffffff;
+  --focus: #2a4fd6;
+  --shadow: 0 1px 2px rgba(20, 33, 61, 0.06), 0 10px 28px rgba(20, 33, 61, 0.07);
+  --card-main: #2a4fd6;
+  --card-tint: #dde5fb;
+  --card-paper: #ffffff;
+  --card-ink: #14213d;
+  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1526;
+    --surface: #172036;
+    --surface-2: #121a2e;
+    --line: #2a3552;
+    --line-strong: #3b4a70;
+    --ink: #eef2fb;
+    --muted: #9ca9c6;
+    --sel-bg: #eef2fb;
+    --sel-fg: #14213d;
+    --focus: #8fa8ff;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px rgba(0, 0, 0, 0.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1526;
+  --surface: #172036;
+  --surface-2: #121a2e;
+  --line: #2a3552;
+  --line-strong: #3b4a70;
+  --ink: #eef2fb;
+  --muted: #9ca9c6;
+  --sel-bg: #eef2fb;
+  --sel-fg: #14213d;
+  --focus: #8fa8ff;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+  padding-block: 14px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.wrap { max-width: 1040px; margin: 0 auto; }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 14px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; letter-spacing: -0.01em; }
+.mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 11px; background: var(--accent); color: var(--on-accent); }
+.mark svg { width: 21px; height: 21px; }
+.pill { font-size: 0.78rem; font-weight: 700; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: 6px 12px; }
+
+.app { display: grid; gap: 22px; }
+.hero { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding-block: 8px 2px; }
+.hero h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.9rem, 7vw, 3.1rem); line-height: 1.05; letter-spacing: -0.025em; margin: 0; text-wrap: balance; }
+.hero p { margin: 8px 0 0; color: var(--muted); font-weight: 600; max-width: 44ch; text-wrap: pretty; }
+.mascot { width: 76px; height: 76px; border-radius: 50%; background: #ffc857; display: grid; place-items: center; overflow: hidden; flex: none; }
+.mascot svg { width: 88%; height: 88%; margin-top: 8%; }
+
+.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.paw { fill: currentColor; stroke: none; }
+
+.stage { display: grid; justify-items: center; gap: 14px; align-content: start; }
+.scene { container-type: inline-size; width: 100%; max-width: 460px; }
+
+.tag { position: relative; padding-top: 10cqw; perspective: 1400px; }
+.hanger { position: absolute; z-index: 0; top: 3cqw; left: 50%; width: 22cqw; height: 9cqw; transform: translateX(-50%); background: linear-gradient(#dfe4ee, #a9b2c4); border-radius: 7cqw 7cqw 0 0; }
+.ring { position: absolute; z-index: 2; top: 0; left: 50%; width: 11cqw; height: 11cqw; transform: translateX(-50%); border-radius: 50%; border: 1.5cqw solid #bcc5d6; box-shadow: inset 0 0 0 0.4cqw rgba(255, 255, 255, 0.7), 0 0.5cqw 0 rgba(20, 33, 61, 0.2); }
+.flipper { position: relative; z-index: 1; aspect-ratio: 7 / 5; transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(0.3, 1.2, 0.5, 1); }
+.flipper.is-back { transform: rotateY(180deg); }
+
+.face { position: absolute; inset: 0; display: flex; flex-direction: column; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 5cqw; border: 0.7cqw solid var(--card-main); background: var(--card-paper); color: var(--card-ink); overflow: hidden; box-shadow: 0 2cqw 3cqw rgba(20, 33, 61, 0.18); }
+.face.back { transform: rotateY(180deg); }
+.face::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.6; background:
+  repeating-radial-gradient(circle at 0% 100%, transparent 0 1.3cqw, var(--card-tint) 1.3cqw 1.6cqw),
+  repeating-radial-gradient(circle at 100% 15%, transparent 0 1.3cqw, var(--card-tint) 1.3cqw 1.6cqw); }
+.face::after { content: ""; position: absolute; z-index: 0; pointer-events: none; right: 30cqw; bottom: -8cqw; width: 46cqw; height: 46cqw; background: var(--card-tint); transform: rotate(-14deg);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='16' rx='5.2' ry='4.2'/%3E%3Cellipse cx='5.6' cy='10.4' rx='2.2' ry='2.9'/%3E%3Cellipse cx='9.6' cy='6.2' rx='2.2' ry='2.9'/%3E%3Cellipse cx='14.4' cy='6.2' rx='2.2' ry='2.9'/%3E%3Cellipse cx='18.4' cy='10.4' rx='2.2' ry='2.9'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='16' rx='5.2' ry='4.2'/%3E%3Cellipse cx='5.6' cy='10.4' rx='2.2' ry='2.9'/%3E%3Cellipse cx='9.6' cy='6.2' rx='2.2' ry='2.9'/%3E%3Cellipse cx='14.4' cy='6.2' rx='2.2' ry='2.9'/%3E%3Cellipse cx='18.4' cy='10.4' rx='2.2' ry='2.9'/%3E%3C/svg%3E") center / contain no-repeat; }
+.face > * { position: relative; z-index: 1; }
+
+.band { flex: none; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 3cqw; height: 11cqw; padding: 0 4.5cqw; color: #ffffff; background-color: var(--card-main); background-image: repeating-radial-gradient(circle at 18% 140%, transparent 0 1.2cqw, rgba(255, 255, 255, 0.16) 1.2cqw 1.45cqw); }
+.band-paw { width: 5.2cqw; height: 5.2cqw; }
+.band-t { display: flex; align-items: baseline; gap: 2.4cqw; line-height: 1; }
+.band-t b { font-family: var(--font-display); font-weight: 800; font-size: 5.2cqw; letter-spacing: 0.1em; }
+.band-t small { font-weight: 800; font-size: 2.3cqw; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.9; }
+
+.front-body { flex: 1; min-height: 0; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) 30cqw; gap: 4cqw; padding: 2.6cqw 4cqw 2.4cqw; align-items: start; }
+.info { display: grid; align-content: start; gap: 0.9cqw; min-width: 0; }
+.name { font-family: var(--font-display); font-weight: 800; font-size: 6.6cqw; line-height: 1.1; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.phone { display: flex; align-items: baseline; gap: 1.6cqw; font-weight: 800; font-size: 4cqw; line-height: 1.2; white-space: nowrap; overflow: hidden; font-variant-numeric: tabular-nums; }
+.phone .lab { flex: none; }
+.addr { font-weight: 600; font-size: 3cqw; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9cqw 3cqw; }
+.field { min-width: 0; }
+.lab { display: block; font-size: 2.2cqw; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--card-main); line-height: 1.2; }
+.val { display: block; font-weight: 700; font-size: 3.5cqw; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.val.mono { font-family: var(--font-mono); font-weight: 500; font-size: 3.1cqw; letter-spacing: 0.02em; }
+
+.side { display: grid; align-content: start; justify-items: start; gap: 1.4cqw; min-width: 0; }
+.photo { position: relative; width: 100%; aspect-ratio: 4 / 5; box-sizing: border-box; overflow: hidden; border-radius: 2.6cqw; border: 0.8cqw solid var(--card-main); background: var(--card-tint); --zoom: 1; --px: 0%; --py: 0%; }
+.photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: translate(var(--px), var(--py)) scale(var(--zoom)); transform-origin: center; }
+.photo .ph { position: absolute; inset: 0; width: 100%; height: 100%; }
+.phbg { fill: var(--card-tint); }
+.chip { display: inline-flex; align-items: center; gap: 1cqw; max-width: 100%; box-sizing: border-box; font-size: 2.5cqw; font-weight: 800; color: var(--card-main); background: var(--card-tint); border-radius: 99px; padding: 0.7cqw 2.2cqw 0.7cqw 1.5cqw; white-space: nowrap; }
+.chip .paw { width: 3cqw; height: 3cqw; }
+
+.back-body { flex: 1; min-height: 0; box-sizing: border-box; display: grid; grid-template-rows: auto 1fr auto; gap: 2cqw; padding: 3.2cqw 5cqw 3.4cqw; }
+.back-title { font-family: var(--font-display); font-weight: 800; font-size: 4cqw; letter-spacing: -0.005em; color: var(--card-main); }
+.notes { margin: 0; font-weight: 600; font-size: 4.2cqw; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.back-foot { display: flex; align-items: flex-end; gap: 3cqw; }
+.code { width: 12cqw; height: 12cqw; flex: none; background: #ffffff; border: 0.4cqw solid var(--card-tint); border-radius: 1.8cqw; padding: 1cqw; box-sizing: border-box; color: var(--card-main); }
+.code svg { display: block; width: 100%; height: 100%; }
+.foot-t { display: grid; gap: 0.8cqw; min-width: 0; flex: 1; }
+.idline2 { font-family: var(--font-mono); font-weight: 500; font-size: 3cqw; letter-spacing: 0.03em; }
+.fine { font-size: 2.2cqw; line-height: 1.3; font-weight: 600; color: var(--muted); }
+.stamp { flex: none; box-sizing: border-box; width: 15cqw; height: 15cqw; border-radius: 50%; border: 0.6cqw solid var(--card-main); box-shadow: inset 0 0 0 0.5cqw var(--card-paper), inset 0 0 0 0.9cqw var(--card-main); color: var(--card-main); display: grid; place-content: center; justify-items: center; gap: 0.3cqw; transform: rotate(-8deg); font-weight: 800; font-size: 2cqw; line-height: 1.1; letter-spacing: 0.06em; text-transform: uppercase; text-align: center; }
+.stamp .paw { width: 3.8cqw; height: 3.8cqw; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 18px; box-sizing: border-box; font: 700 0.95rem var(--font-body); color: var(--ink); background: var(--surface); border: 1.5px solid var(--line-strong); border-radius: 12px; cursor: pointer; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 800; }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.sr:focus-visible + .btn, .btn:focus-visible, .tab-btn:focus-visible, .sw:focus-visible, .linkish:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.editor { display: grid; gap: 14px; min-width: 0; align-content: start; }
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 5px; box-shadow: var(--shadow); }
+.tab-btn { display: grid; justify-items: center; gap: 3px; min-height: 56px; padding: 8px 2px; border: 0; border-radius: 12px; background: none; color: var(--muted); font: 700 0.78rem var(--font-body); cursor: pointer; }
+.tab-btn[aria-selected="true"] { background: var(--sel-bg); color: var(--sel-fg); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; box-shadow: var(--shadow); display: grid; gap: 14px; }
+.note { margin: 0; color: var(--muted); font-size: 0.92rem; font-weight: 600; }
+.note.small { font-size: 0.82rem; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fields .full { grid-column: 1 / -1; }
+.fld { display: grid; gap: 5px; min-width: 0; align-content: start; }
+.fld > label, .slider > label { font-size: 0.82rem; font-weight: 700; color: var(--muted); }
+input[type="text"], input[type="tel"], input[type="date"], select, textarea { width: 100%; box-sizing: border-box; min-height: 46px; padding: 10px 12px; font: 600 1rem var(--font-body); color: var(--ink); background: var(--surface-2); border: 1.5px solid var(--line); border-radius: 12px; }
+textarea { min-height: 96px; resize: vertical; line-height: 1.35; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.check { display: flex; align-items: center; gap: 10px; min-height: 46px; font-weight: 700; font-size: 0.95rem; }
+.check input { width: 22px; height: 22px; accent-color: var(--focus); margin: 0; }
+.id-row { display: flex; gap: 10px; }
+.id-row input { flex: 1; min-width: 0; font-family: var(--font-mono); font-weight: 500; }
+.slider { display: grid; gap: 2px; }
+input[type="range"] { width: 100%; height: 32px; margin: 0; accent-color: var(--focus); }
+input[type="range"]:disabled { opacity: 0.45; }
+.count { justify-self: end; font-size: 0.8rem; color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.sw { display: grid; justify-items: center; gap: 6px; min-height: 44px; padding: 4px 0; background: none; border: 0; color: var(--ink); font: 700 0.76rem var(--font-body); cursor: pointer; border-radius: 12px; }
+.sw i { width: 42px; height: 42px; border-radius: 50%; background: var(--s); }
+.sw[aria-pressed="true"] i { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--ink); }
+
+.linkish { justify-self: start; background: none; border: 0; padding: 6px 2px; color: var(--muted); font: 700 0.85rem var(--font-body); text-decoration: underline; cursor: pointer; }
+.foot { grid-column: 1 / -1; margin: 6px auto 0; max-width: 60ch; text-align: center; color: var(--muted); font-size: 0.82rem; font-weight: 600; text-wrap: balance; }
+
+@media (min-width: 880px) {
+  .app { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; gap: 28px; }
+  .stage { position: sticky; top: 24px; }
+  .mascot { width: 110px; height: 110px; }
+}
+@media (prefers-reduced-motion: reduce) { .flipper { transition: none; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-paw" viewBox="0 0 24 24"><ellipse cx="12" cy="16" rx="5.2" ry="4.2"/><ellipse cx="5.6" cy="10.4" rx="2.2" ry="2.9"/><ellipse cx="9.6" cy="6.2" rx="2.2" ry="2.9"/><ellipse cx="14.4" cy="6.2" rx="2.2" ry="2.9"/><ellipse cx="18.4" cy="10.4" rx="2.2" ry="2.9"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l1.6-2.2h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.2" r="3.4"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3.5"/><circle cx="9" cy="11" r="2"/><path d="M14 10h4M14 14h4M6.5 16c.6-1.4 1.6-2 2.5-2s1.9.6 2.5 2"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3.5h8.5L19 8v12.5H6z"/><path d="M14 3.5V8h5M9 12.5h6M9 16h6"/></symbol>
+  <symbol id="i-swatch" viewBox="0 0 24 24"><path d="M12 3.5c-4.7 0-8.5 3.6-8.5 8.2 0 4.4 3.5 8.8 8.1 8.8 1.5 0 2-.9 1.6-1.9-.5-1.2.1-2.3 1.4-2.3H17c2 0 3.5-1.4 3.5-3.4 0-5-3.8-9.4-8.5-9.4z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="8" r="1"/><circle cx="16" cy="11" r="1"/></symbol>
+  <symbol id="i-flip" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.6-5.7L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 0 1-13.6 5.7L4 15.5M4 20v-4.5h4.5"/></symbol>
+  <symbol id="i-dog" viewBox="0 0 120 120">
+    <path d="M24 36Q8 40 12 80Q14 94 29 89Q37 70 35 46Z" fill="#a8642f"/>
+    <path d="M96 36Q112 40 108 80Q106 94 91 89Q83 70 85 46Z" fill="#a8642f"/>
+    <ellipse cx="60" cy="62" rx="34" ry="32" fill="#e6ae72"/>
+    <ellipse cx="60" cy="77" rx="19" ry="15" fill="#fff3e2"/>
+    <circle cx="47" cy="57" r="3.8" fill="#14213d"/>
+    <circle cx="73" cy="57" r="3.8" fill="#14213d"/>
+    <path d="M52.5 67Q60 62.5 67.5 67Q64.5 76 60 76Q55.5 76 52.5 67Z" fill="#14213d"/>
+    <path d="M60 76V80M60 80Q55 86 50 82M60 80Q65 86 70 82" fill="none" stroke="#14213d" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M55.5 84Q60 96 64.5 84Z" fill="#ff7a8a"/>
+  </symbol>
+</svg>
+
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><span class="mark"><svg class="paw" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-paw"/></svg></span>Pawmit</div>
+    <span class="pill">Stays on your device</span>
+  </div>
+
+  <main class="app">
+    <header class="hero">
+      <div>
+        <h1>A licence for your best friend.</h1>
+        <p>Add a photo and a few details, then flip the card over to see the back.</p>
+      </div>
+      <div class="mascot" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#i-dog"/></svg></div>
+    </header>
+
+    <section class="stage" aria-label="Licence preview">
+      <div class="scene">
+        <div class="tag" id="tag">
+          <span class="hanger" aria-hidden="true"></span>
+          <span class="ring" aria-hidden="true"></span>
+          <div class="flipper" id="flipper">
+
+            <section class="face front" id="face-front" aria-label="Front of the licence">
+              <div class="band">
+                <svg class="paw band-paw" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-paw"/></svg>
+                <span class="band-t"><b>PAWMIT</b><small>Pet licence</small></span>
+                <svg class="paw band-paw" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-paw"/></svg>
+              </div>
+              <div class="front-body">
+                <div class="info">
+                  <div class="name" id="c-name">Mochi</div>
+                  <div class="phone"><span class="lab">Phone</span><span id="c-phone">0400 000 000</span></div>
+                  <div class="addr" id="c-addr">12 Daisy Lane, Sakura Hill</div>
+                  <div class="field"><span class="lab">Breed</span><span class="val" id="c-breed">Shiba Inu</span></div>
+                  <div class="pair">
+                    <div class="field"><span class="lab">Class</span><span class="val" id="c-class">Canine</span></div>
+                    <div class="field"><span class="lab">Sex</span><span class="val" id="c-sex">F</span></div>
+                    <div class="field"><span class="lab">Eyes</span><span class="val" id="c-eyes">Brown</span></div>
+                    <div class="field"><span class="lab">Coat</span><span class="val" id="c-coat">Cream</span></div>
+                    <div class="field"><span class="lab">Born</span><span class="val" id="c-dob">15/05/2020</span></div>
+                    <div class="field"><span class="lab">Licence no.</span><span class="val mono" id="c-id">PWM-0427-K9</span></div>
+                  </div>
+                </div>
+                <div class="side">
+                  <div class="photo" id="c-photo">
+                    <svg class="ph" id="c-ph" viewBox="0 0 120 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                      <rect class="phbg" width="120" height="150"/>
+                      <use href="#i-dog" x="0" y="26" width="120" height="120"/>
+                    </svg>
+                    <img id="c-img" alt="Your pet's photo" hidden>
+                  </div>
+                  <span class="chip" id="c-chip"><svg class="paw" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-paw"/></svg>Microchipped</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="face back" id="face-back" aria-label="Back of the licence" aria-hidden="true">
+              <div class="band">
+                <svg class="paw band-paw" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-paw"/></svg>
+                <span class="band-t"><b>PAWMIT</b><small>Pet licence</small></span>
+                <svg class="paw band-paw" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-paw"/></svg>
+              </div>
+              <div class="back-body">
+                <div class="back-title">Needs and restrictions</div>
+                <p class="notes" id="c-notes"></p>
+                <div class="back-foot">
+                  <div class="code"><svg id="c-code" viewBox="0 0 7 7" aria-hidden="true"></svg></div>
+                  <div class="foot-t">
+                    <div class="idline2">ID# <span id="c-id2">PWM-0427-K9</span></div>
+                    <div class="fine">Novelty keepsake made with Pawmit. Not a government document.</div>
+                  </div>
+                  <div class="stamp" aria-hidden="true"><svg class="paw" viewBox="0 0 24 24"><use href="#i-paw"/></svg><span>Very good<br>dog</span></div>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn" id="flip-btn"><svg class="ic" aria-hidden="true"><use href="#i-flip"/></svg><span id="flip-t">See the back</span></button>
+    </section>
+
+    <section class="editor" aria-label="Edit your licence">
+      <div class="tabs" role="tablist" aria-label="Licence tools">
+        <button type="button" class="tab-btn" role="tab" id="tab-photo" data-tab="photo" aria-controls="panel-photo" aria-selected="true"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg>Photo</button>
+        <button type="button" class="tab-btn" role="tab" id="tab-details" data-tab="details" aria-controls="panel-details" aria-selected="false" tabindex="-1"><svg class="ic" aria-hidden="true"><use href="#i-card"/></svg>Details</button>
+        <button type="button" class="tab-btn" role="tab" id="tab-notes" data-tab="notes" aria-controls="panel-notes" aria-selected="false" tabindex="-1"><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg>Notes</button>
+        <button type="button" class="tab-btn" role="tab" id="tab-colour" data-tab="colour" aria-controls="panel-colour" aria-selected="false" tabindex="-1"><svg class="ic" aria-hidden="true"><use href="#i-swatch"/></svg>Colour</button>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-photo" aria-labelledby="tab-photo">
+        <p class="note">Pick a clear photo of your pup's face, then use the sliders to frame it.</p>
+        <div class="btn-row">
+          <input class="sr" type="file" id="f-photo" accept="image/*">
+          <label class="btn btn-primary" for="f-photo">Choose photo</label>
+          <button type="button" class="btn" id="photo-remove" disabled>Remove</button>
+        </div>
+        <div class="slider"><label for="ph-zoom">Zoom</label><input type="range" id="ph-zoom" min="100" max="300" step="5" value="100" disabled></div>
+        <div class="slider"><label for="ph-x">Slide left or right</label><input type="range" id="ph-x" min="-100" max="100" step="1" value="0" disabled></div>
+        <div class="slider"><label for="ph-y">Slide up or down</label><input type="range" id="ph-y" min="-100" max="100" step="1" value="0" disabled></div>
+        <p class="note small" id="photo-status" role="status">Zoom in first, then slide the photo around. Your photo stays on this device and is never uploaded.</p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-details" aria-labelledby="tab-details" hidden>
+        <p class="note">Type over the example details. The card updates as you go.</p>
+        <div class="fields">
+          <div class="fld full"><label for="f-name">Pet name</label><input type="text" id="f-name" maxlength="16" autocomplete="off"></div>
+          <div class="fld full"><label for="f-breed">Breed</label><input type="text" id="f-breed" maxlength="24" autocomplete="off"></div>
+          <div class="fld"><label for="f-class">Class</label>
+            <select id="f-class"><option>Canine</option><option>Feline</option><option>Rabbit</option><option>Bird</option><option>Other</option></select></div>
+          <div class="fld"><label for="f-sex">Sex</label>
+            <select id="f-sex"><option value="F">Girl (F)</option><option value="M">Boy (M)</option></select></div>
+          <div class="fld"><label for="f-eyes">Eye colour</label><input type="text" id="f-eyes" maxlength="12" autocomplete="off"></div>
+          <div class="fld"><label for="f-coat">Coat colour</label><input type="text" id="f-coat" maxlength="12" autocomplete="off"></div>
+          <div class="fld"><label for="f-dob">Birthday</label><input type="date" id="f-dob"></div>
+          <div class="fld"><span class="sr">Microchip</span><label class="check" for="f-chip"><input type="checkbox" id="f-chip">Microchipped</label></div>
+          <div class="fld full"><label for="f-phone">Owner phone</label><input type="tel" id="f-phone" maxlength="18" autocomplete="off"></div>
+          <div class="fld full"><label for="f-addr">Address (optional)</label><input type="text" id="f-addr" maxlength="44" autocomplete="off">
+            <span class="note small">Only add what you'd be happy for a finder to see.</span></div>
+          <div class="fld full"><label for="f-id">Licence number</label>
+            <div class="id-row"><input type="text" id="f-id" maxlength="14" autocomplete="off"><button type="button" class="btn" id="id-shuffle">Shuffle</button></div></div>
+        </div>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-notes" aria-labelledby="tab-notes" hidden>
+        <p class="note">Anything a finder should know about your pup. It shows on the back of the card.</p>
+        <div class="fld"><label for="f-notes">Needs and restrictions</label><textarea id="f-notes" maxlength="110"></textarea><span class="count" id="notes-count">0 / 110</span></div>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-colour" aria-labelledby="tab-colour" hidden>
+        <p class="note">Pick a card colour.</p>
+        <div class="swatches" role="group" aria-label="Card colour">
+          <button type="button" class="sw" data-theme="cobalt" aria-pressed="true" style="--s:#2a4fd6"><i></i>Cobalt</button>
+          <button type="button" class="sw" data-theme="teal" aria-pressed="false" style="--s:#0b7a75"><i></i>Teal</button>
+          <button type="button" class="sw" data-theme="berry" aria-pressed="false" style="--s:#a3246b"><i></i>Berry</button>
+          <button type="button" class="sw" data-theme="tangerine" aria-pressed="false" style="--s:#c2480b"><i></i>Tangerine</button>
+          <button type="button" class="sw" data-theme="forest" aria-pressed="false" style="--s:#1f6b3a"><i></i>Forest</button>
+        </div>
+      </div>
+
+      <p class="note small">To keep your card, take a screenshot of each side.</p>
+      <button type="button" class="linkish" id="reset">Reset to the example card</button>
+    </section>
+
+    <p class="foot">Pawmit is a just-for-fun keepsake. It is not a real licence or a government document. Your photo and details stay in your browser.</p>
+  </main>
+</div>
+
+<script>
+(function () {
+  var EXAMPLE = {
+    name: 'Mochi', breed: 'Shiba Inu', cls: 'Canine', sex: 'F', eyes: 'Brown', coat: 'Cream',
+    dob: '2020-05-15', phone: '0400 000 000', addr: '12 Daisy Lane, Sakura Hill', id: 'PWM-0427-K9',
+    notes: "I'm shy around other pups and need a little space. Please ask before giving me treats!"
+  };
+  var THEMES = {
+    cobalt:    { main: '#2a4fd6', tint: '#dde5fb' },
+    teal:      { main: '#0b7a75', tint: '#d3ece9' },
+    berry:     { main: '#a3246b', tint: '#f3d9e8' },
+    tangerine: { main: '#c2480b', tint: '#f9dccb' },
+    forest:    { main: '#1f6b3a', tint: '#d8eadb' }
+  };
+  var IDS = { name: 'f-name', breed: 'f-breed', cls: 'f-class', sex: 'f-sex', eyes: 'f-eyes', coat: 'f-coat', dob: 'f-dob', phone: 'f-phone', addr: 'f-addr', id: 'f-id', notes: 'f-notes' };
+  var KEYS = Object.keys(IDS);
+  var el = {};
+  KEYS.forEach(function (k) { el[k] = document.getElementById(IDS[k]); });
+  var chip = document.getElementById('f-chip');
+  var theme = 'cobalt';
+  var STORE = 'pawmit-v1';
+
+  function $(id) { return document.getElementById(id); }
+  function setText(id, v, fallback) { $(id).textContent = v || fallback; }
+  function fmtDate(v) {
+    if (!v) return '--/--/----';
+    var p = v.split('-');
+    return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : v;
+  }
+
+  function drawCode(seed) {
+    var h = 2166136261;
+    for (var i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    h = h || 1;
+    var svg = $('c-code');
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var ns = 'http://www.w3.org/2000/svg';
+    for (var y = 0; y < 7; y++) {
+      for (var x = 0; x < 4; x++) {
+        h ^= h << 13; h >>>= 0; h ^= h >>> 17; h ^= h << 5; h >>>= 0;
+        if ((h >>> 9) & 1) {
+          [x, 6 - x].forEach(function (cx, idx) {
+            if (idx === 1 && cx === x) return;
+            var r = document.createElementNS(ns, 'rect');
+            r.setAttribute('x', cx); r.setAttribute('y', y);
+            r.setAttribute('width', 1); r.setAttribute('height', 1);
+            r.setAttribute('rx', 0.2); r.setAttribute('fill', 'currentColor');
+            svg.appendChild(r);
+          });
+        }
+      }
+    }
+  }
+
+  function update() {
+    setText('c-name', el.name.value.trim(), 'Your pup');
+    setText('c-phone', el.phone.value.trim(), '-');
+    var a = el.addr.value.trim();
+    $('c-addr').textContent = a;
+    $('c-addr').hidden = !a;
+    setText('c-breed', el.breed.value.trim(), '-');
+    setText('c-class', el.cls.value, '-');
+    setText('c-sex', el.sex.value, '-');
+    setText('c-eyes', el.eyes.value.trim(), '-');
+    setText('c-coat', el.coat.value.trim(), '-');
+    $('c-dob').textContent = fmtDate(el.dob.value);
+    var id = el.id.value.trim() || 'PWM-0000';
+    $('c-id').textContent = id;
+    $('c-id2').textContent = id;
+    $('c-chip').hidden = !chip.checked;
+    $('c-notes').textContent = el.notes.value.trim();
+    $('notes-count').textContent = el.notes.value.length + ' / 110';
+    drawCode(id);
+  }
+
+  function save() {
+    try {
+      var o = { theme: theme, chip: chip.checked };
+      KEYS.forEach(function (k) { o[k] = el[k].value; });
+      localStorage.setItem(STORE, JSON.stringify(o));
+    } catch (e) {}
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE);
+      if (!raw) return false;
+      var o = JSON.parse(raw);
+      KEYS.forEach(function (k) { if (typeof o[k] === 'string') el[k].value = o[k]; });
+      if (typeof o.chip === 'boolean') chip.checked = o.chip;
+      if (THEMES[o.theme]) theme = o.theme;
+      return true;
+    } catch (e) { return false; }
+  }
+  function fillExample() {
+    KEYS.forEach(function (k) { el[k].value = EXAMPLE[k]; });
+    chip.checked = true;
+    theme = 'cobalt';
+  }
+
+  function applyTheme() {
+    var t = THEMES[theme], s = $('tag').style;
+    s.setProperty('--card-main', t.main);
+    s.setProperty('--card-tint', t.tint);
+    [].forEach.call(document.querySelectorAll('.sw'), function (b) {
+      b.setAttribute('aria-pressed', b.dataset.theme === theme ? 'true' : 'false');
+    });
+  }
+
+  /* Photo */
+  var frame = $('c-photo'), img = $('c-img'), ph = $('c-ph');
+  var zoom = $('ph-zoom'), sx = $('ph-x'), sy = $('ph-y'), removeBtn = $('photo-remove'), status = $('photo-status');
+  var STATUS_DEFAULT = status.textContent;
+
+  function applyFrame() {
+    var z = Number(zoom.value) / 100;
+    var maxShift = (z - 1) * 50;
+    frame.style.setProperty('--zoom', z);
+    frame.style.setProperty('--px', (-Number(sx.value) / 100 * maxShift) + '%');
+    frame.style.setProperty('--py', (-Number(sy.value) / 100 * maxShift) + '%');
+  }
+  function setPhoto(src) {
+    var has = !!src;
+    if (has) { img.src = src; } else { img.removeAttribute('src'); }
+    img.hidden = !has;
+    ph.hidden = has;
+    [zoom, sx, sy, removeBtn].forEach(function (c) { c.disabled = !has; });
+    zoom.value = 100; sx.value = 0; sy.value = 0;
+    applyFrame();
+  }
+  function loadPhoto(file) {
+    if (!file || !/^image\//.test(file.type)) {
+      status.textContent = 'That file is not a photo. Try a JPG or PNG.';
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function () {
+      var probe = new Image();
+      probe.onload = function () {
+        var max = 900, s = Math.min(1, max / Math.max(probe.naturalWidth, probe.naturalHeight));
+        var c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(probe.naturalWidth * s));
+        c.height = Math.max(1, Math.round(probe.naturalHeight * s));
+        var out = reader.result;
+        try {
+          c.getContext('2d').drawImage(probe, 0, 0, c.width, c.height);
+          out = c.toDataURL('image/jpeg', 0.88);
+        } catch (e) {}
+        setPhoto(out);
+        status.textContent = 'Photo added. Zoom in, then slide it into place.';
+      };
+      probe.onerror = function () { status.textContent = 'That photo could not be opened. Try a JPG or PNG.'; };
+      probe.src = reader.result;
+    };
+    reader.onerror = function () { status.textContent = 'That photo could not be read. Try another one.'; };
+    reader.readAsDataURL(file);
+  }
+
+  $('f-photo').addEventListener('change', function (e) {
+    loadPhoto(e.target.files && e.target.files[0]);
+    e.target.value = '';
+  });
+  removeBtn.addEventListener('click', function () { setPhoto(null); status.textContent = STATUS_DEFAULT; });
+  [zoom, sx, sy].forEach(function (s) { s.addEventListener('input', applyFrame); });
+
+  /* Fields */
+  [].forEach.call(document.querySelectorAll('.fields input, .fields select, #f-notes'), function (c) {
+    ['input', 'change'].forEach(function (ev) { c.addEventListener(ev, function () { update(); save(); }); });
+  });
+  [].forEach.call(document.querySelectorAll('input[type="text"], input[type="tel"]'), function (c) {
+    c.addEventListener('focus', function () { try { c.select(); } catch (e) {} });
+  });
+
+  function rnd(n) { return Math.floor(Math.random() * n); }
+  $('id-shuffle').addEventListener('click', function () {
+    var L = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    el.id.value = 'PWM-' + ('000' + rnd(10000)).slice(-4) + '-' + L.charAt(rnd(L.length)) + rnd(10);
+    update(); save();
+  });
+
+  [].forEach.call(document.querySelectorAll('.sw'), function (b) {
+    b.addEventListener('click', function () { theme = b.dataset.theme; applyTheme(); save(); });
+  });
+
+  $('reset').addEventListener('click', function () {
+    fillExample(); setPhoto(null); status.textContent = STATUS_DEFAULT;
+    applyTheme(); update();
+    try { localStorage.removeItem(STORE); } catch (e) {}
+  });
+
+  /* Flip */
+  var flipper = $('flipper');
+  function setFlip(back) {
+    flipper.classList.toggle('is-back', back);
+    $('flip-t').textContent = back ? 'See the front' : 'See the back';
+    $('face-front').setAttribute('aria-hidden', back ? 'true' : 'false');
+    $('face-back').setAttribute('aria-hidden', back ? 'false' : 'true');
+  }
+  $('flip-btn').addEventListener('click', function () { setFlip(!flipper.classList.contains('is-back')); });
+
+  /* Tabs */
+  var tabs = [].slice.call(document.querySelectorAll('[role="tab"]'));
+  function selectTab(t, focus) {
+    tabs.forEach(function (b) {
+      var on = b === t;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+      $(b.getAttribute('aria-controls')).hidden = !on;
+    });
+    setFlip(t.dataset.tab === 'notes');
+    if (focus) t.focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { selectTab(t, false); });
+    t.addEventListener('keydown', function (e) {
+      var n = null;
+      if (e.key === 'ArrowRight') n = tabs[(i + 1) % tabs.length];
+      if (e.key === 'ArrowLeft') n = tabs[(i + tabs.length - 1) % tabs.length];
+      if (n) { e.preventDefault(); selectTab(n, true); }
+    });
+  });
+
+  if (!load()) fillExample();
+  applyTheme();
+  update();
+})();
+</script>
+</body>
+</html>
